@@ -1,2 +1,2 @@
 # PIMP2
-Théo is an ok guy
+Sorry Théo, I was just kidding. You are a great guy!
