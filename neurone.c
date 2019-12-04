@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "matrices.c"
 
 struct information{
   int n;
@@ -7,30 +8,21 @@ struct information{
 };
 typedef struct information information;
 
-struct input{
-  int n;
-  int * vect;
-};
-typedef struct input input;
-
-struct neurone{
-  int n;
-  float * weights;
-};
-typedef struct neurone neurone;
 
 struct layer{
-  int nb_neur;
-  neurone * nrn;
+  int nb_nrn;
+  matrix * weights;
+  matrix * outputs;
 };
 typedef struct layer layer;
-
+  
 struct network{
   int nb_layer;
   layer * lyr;
   information info;
 };
 typedef struct network network;
+
 
 //[nbfeat,3,3,1]
 
@@ -45,25 +37,40 @@ int rand_Belhadj(int n){
 
 network * alloc_network(network * ntw, information info){
   int i, j, k;
-
+  matrix * weights;
+  matrix obj1;
+  weights = &obj1;
 
   ntw->nb_layer=(info.n)-1;
   ntw->lyr = malloc(ntw->nb_layer * sizeof(layer));
 
+  
   for(i=0;i<info.n-1;i++){
-    ntw->lyr[i].nrn = malloc(info.vect[i+1] * sizeof(neurone));
-    ntw->lyr[i].nb_neur = info.vect[i+1];
-    for(j=0;j<info.vect[i+1];j++){
-      ntw->lyr[i].nrn[j].weights = malloc(info.vect[i]+1 * sizeof(float));
-      ntw->lyr[i].nrn[j].n = info.vect[i]+1;
-      for(k=0;k<info.vect[i]+1;k++){
-	ntw->lyr[i].nrn[j].weights[k]=frand_a_b(-1.0,1);
+
+    ntw->lyr[i].weights = malloc(sizeof(matrix));
+    ntw->lyr[i].weights->mat_h = info.vect[i]+1;
+    ntw->lyr[i].weights->mat_w = info.vect[i+1];
+    alloc_matrix(ntw->lyr[i].weights);
+
+    ntw->lyr[i].outputs = malloc(sizeof(matrix));
+    ntw->lyr[i].outputs->mat_h = 1;
+    ntw->lyr[i].outputs->mat_w = info.vect[i+1]+1;
+    alloc_matrix(ntw->lyr[i].outputs);
+
+    ntw->lyr[i].nb_nrn = info.vect[i+1];
+
+    ntw->lyr[i].outputs->mat[0][ntw->lyr[i].outputs->mat_w-1] = 1.0;
+    
+    for (j=0; j<ntw->lyr[i].weights->mat_h; j++){
+      for (k=0; k<ntw->lyr[i].weights->mat_w; k++){
+	ntw->lyr[i].weights->mat[j][k] = frand_a_b(-1.0,1);
       }
     }
   }
   ntw->info=info;
   return ntw;
 }
+ 
 
 void print_network(network * ntw){
   int i, j, k;
@@ -74,13 +81,37 @@ void print_network(network * ntw){
   for(i=0;i<ntw->info.n-1;i++){
     for(j=0;j<ntw->info.vect[i+1];j++){
       for(k=0;k<ntw->info.vect[i]+1;k++){
+
+	//	if(i==0){
 	  printf("LAYER%d, NEUR%d, WEIGHT%d  --->\t",i,j,k);
-	  printf("%f\n",ntw->lyr[i].nrn[j].weights[k]);
+	  printf("%f\n",ntw->lyr[i].weights->mat[k][j]);
       }
     }
     printf("\n");
   }
 }
+
+
+void layer_output(matrix * previous_layer_output, layer * lyr){
+
+  int i, j;
+  
+  matrix * preactivation_matrix;
+  matrix obj1;
+  preactivation_matrix = &obj1;
+
+  preactivation_matrix = matrix_dot_product(previous_layer_output, lyr->weights, preactivation_matrix);
+  matrix_sigmoid(preactivation_matrix);
+
+  for(i=0; i<preactivation_matrix->mat_w; i++){
+    lyr->outputs.mat[0][i] = preactivation_matrix->mat[0][i];
+  }
+  lyr->outputs.mat[0][preactivation_matrix->mat_w] = 1.0;
+
+  free(preactivation_matrix);
+}
+
+
 
 /*
 float preactivation(input in, neurone * nrn){
@@ -101,7 +132,7 @@ float activation(float preact){
 }
 */
 
-
+/*
 matrix * weight_matrix(layer * lyr, matrix * m){
   int i, j;
 
@@ -128,7 +159,8 @@ matrix * bias_vector(layer * lyr, matrix * m){
   return m;
 }
 
-matrix * 
+*/
+ 
     
       
 int main(){
