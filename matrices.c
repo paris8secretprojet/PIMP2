@@ -26,7 +26,7 @@ void alloc_matrix(matrix *m){
   }
 }
 
-matrix *create_matrix(matrix *m, int number_rows, int number_columns, float init){
+void create_matrix(matrix *m, int number_rows, int number_columns, float init){
 
   int row;
   int col;
@@ -41,7 +41,6 @@ matrix *create_matrix(matrix *m, int number_rows, int number_columns, float init
       m->mat[row][col] = init;
     }
   }
-  return m;
 }
 
 
@@ -124,94 +123,62 @@ matrix * matrix_scalar_add(matrix * m1, float k, matrix * m3){
   return m3;
 }
 
-matrix * matrix_scalar_prod(matrix * m1, float k, matrix * m3){
+void matrix_scalar_prod(matrix * m1, float k){
 
   int i, j;
 
-  m3->mat_h=m1->mat_h;
-  m3->mat_w=m1->mat_w;
-
-  alloc_matrix(m3);
-
-  for(i=0;i<m3->mat_h;i++){
-    for(j=0;j<m3->mat_w;j++){
-      m3->mat[i][j]=m1->mat[i][j] * k;
+  for(i=0;i<m1->mat_h;i++){
+    for(j=0;j<m1->mat_w;j++){
+      m1->mat[i][j]=m1->mat[i][j] * k;
     }
   }
-  return m3;
 }
 
-matrix * matrix_sigmoid(matrix * m1, matrix * m3){
+void matrix_sigmoid(matrix * m){
 
   int i, j;
 
-  m3->mat_h=m1->mat_h;
-  m3->mat_w=m1->mat_w;
-
-  alloc_matrix(m3);
-
-  for(i=0;i<m3->mat_h;i++){
-    for(j=0;j<m3->mat_w;j++){
-      m3->mat[i][j]=1/(1+exp(-(m1->mat[i][j])));
+  for(i=0;i<m->mat_h;i++){
+    for(j=0;j<m->mat_w;j++){
+      m->mat[i][j]=1/(1+exp(-(m->mat[i][j])));
     }
   }
-  return m3;
 }
 
-matrix * matrix_sigmoid_prime(matrix * m1, matrix * m3){
+void matrix_sigmoid_prime(matrix * m){
 
   int i, j;
 
-  m3->mat_h=m1->mat_h;
-  m3->mat_w=m1->mat_w;
-
-  alloc_matrix(m3);
-
-  for(i=0;i<m3->mat_h;i++){
-    for(j=0;j<m3->mat_w;j++){
-      m3->mat[i][j]=(1/(1+exp(-(m1->mat[i][j]))))*(1-(1/(1+exp(-(m1->mat[i][j])))));
+  for(i=0;i<m->mat_h;i++){
+    for(j=0;j<m->mat_w;j++){
+      m->mat[i][j]=(1/(1+exp(-(m->mat[i][j]))))*(1-(1/(1+exp(-(m->mat[i][j])))));
     }
   }
-  return m3;
 }
 
-matrix * matrix_tanh(matrix * m1, matrix * m3){
-
+void matrix_tanh(matrix * m){
   int i, j;
-
-  m3->mat_h=m1->mat_h;
-  m3->mat_w=m1->mat_w;
-
-  alloc_matrix(m3);
-
-  for(i=0;i<m3->mat_h;i++){
-    for(j=0;j<m3->mat_w;j++){
-      m3->mat[i][j]=tanh(m1->mat[i][j]);
+  
+  for(i=0;i<m->mat_h;i++){
+    for(j=0;j<m->mat_w;j++){
+      m->mat[i][j]=tanh(m->mat[i][j]);
     }
   }
-  return m3;
 }
 
-matrix * matrix_relu(matrix * m1, matrix * m3){
-
+void matrix_relu(matrix * m){
   int i, j;
 
-  m3->mat_h=m1->mat_h;
-  m3->mat_w=m1->mat_w;
-
-  alloc_matrix(m3);
-
-  for(i=0;i<m3->mat_h;i++){
-    for(j=0;j<m3->mat_w;j++){
-      if(m1->mat[i][j]<0){
-	m3->mat[i][j]=0;
+  for(i=0;i<m->mat_h;i++){
+    for(j=0;j<m->mat_w;j++){
+      if(m->mat[i][j]<0){
+	m->mat[i][j]=0;
       }
       else{
-	m3->mat[i][j]=m1->mat[i][j];
+	m->mat[i][j]=m->mat[i][j];
       }	
     }
   }
-  return m3;
 }
 
 
@@ -358,34 +325,15 @@ matrix * matrix_remove_row(matrix *m1, matrix *m3, int indice){
   return m3;
 }
 
+
+/*
 int main(void){
-
   
-  matrix *m1, *m2, *m3, *m4, *m5, *m6, *m7, *m8;
-  matrix objm1, objm2, objm3, objm4, objm5, objm6, objm7, objm8;
-  m1=&objm1, m2=&objm2, m3=&objm3, m4=&objm4, m5=&objm5, m6=&objm6, m7=&objm7, m8=&objm8;
+  matrix *m1, *m2, *m3;
+  m1 = malloc(sizeof(matrix));
 
-  m1 = create_matrix(m1, 3, 8, 18);
+  create_matrix(m1,3,4,2.5);
   printMatrix(m1);
-
-  m2 = create_matrix(m2, 8, 3, 10.0);
-  printMatrix(m2);
-
-  m3 = dot_product(m1, m2, m3);
-  printMatrix(m3);
-
-  m4 = create_matrix(m4, 3, 3, 25.5);
-  printMatrix(m4);
-
-  m5 = matrix_sum(m3,m4,m5);
-  printMatrix(m5);
-
-  m6 = matrix_add_column(m5,m6,2,1);
-  printMatrix(m6);
-
-  m7 = matrix_add_row(m6,m7,2,2);
-  printMatrix(m7);
-
-  //m8 = matrix_remove_row(m6,m8,0);
-  //printMatrix(m8);
+  
 }
+*/
