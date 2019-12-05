@@ -165,7 +165,7 @@ void create_matrix_random(matrix *m, int number_rows, int number_columns){
   
   for(row=0; row<number_rows; row++){
     for(col=0; col<number_columns; col++){
-      m->mat[row][col] = frand_a_b(0,255);
+      m->mat[row][col] = frand_a_b(-1.0,1);
     }
   }
 }
@@ -181,6 +181,21 @@ void print_layer_output(layer *lyr){
     printf("Output %d --->   %f\n",i,lyr->outputs->mat[0][i]);
   }
 }
+
+void foreward(network * ntw, matrix * data){
+  int i;
+
+  matrix ** pt_data;
+  pt_data = malloc(sizeof(matrix*));
+  pt_data=&data;
+
+  for(i=0;i<ntw->nb_layer;i++){
+    layer_output(*pt_data,&(ntw->lyr[i]));
+    pt_data=&(ntw->lyr[i].outputs);
+  }
+  printf("Predict :\n");
+  print_layer_output(&(ntw->lyr[(ntw->nb_layer)-1]));
+}
  
     
       
@@ -192,7 +207,7 @@ int main(){
   ntw=&objntw;
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={2,3,1};
+  int t[]={2,30,10,5,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
   
@@ -205,8 +220,10 @@ int main(){
   matrix_init_bias(test);
   printMatrix(test);
 
-  layer_output(test,&(ntw->lyr[0]));
-  print_layer_output(&(ntw->lyr[0]));
+  //layer_output(test,&(ntw->lyr[0]));
+  //print_layer_output(&(ntw->lyr[0]));
+
+  foreward(ntw,test);
 
   
   
