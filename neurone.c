@@ -104,11 +104,11 @@ void layer_output(matrix * previous_layer_output, layer * lyr){
   matrix_sigmoid(preactivation_matrix);
 
   for(i=0; i<preactivation_matrix->mat_w; i++){
-    lyr->outputs.mat[0][i] = preactivation_matrix->mat[0][i];
+    lyr->outputs->mat[0][i] = preactivation_matrix->mat[0][i];
   }
-  lyr->outputs.mat[0][preactivation_matrix->mat_w] = 1.0;
+  lyr->outputs->mat[0][preactivation_matrix->mat_w] = 1.0;
 
-  free(preactivation_matrix);
+  //free(preactivation_matrix);
 }
 
 
@@ -118,7 +118,6 @@ float preactivation(input in, neurone * nrn){
   int i;
   float output;
   output=0;
-
   for(i=0;i<in.n;i++){
     output += in.vect[i] * nrn->weights[i];
   }
@@ -126,7 +125,6 @@ float preactivation(input in, neurone * nrn){
   
   return output;
 }
-
 float activation(float preact){
   return 1/(1+exp(-preact));
 }
@@ -135,10 +133,8 @@ float activation(float preact){
 /*
 matrix * weight_matrix(layer * lyr, matrix * m){
   int i, j;
-
   m->mat_h = lyr->nrn.n;
   m->mat_w = lyr->nb_neur;
-
   for(i=0;i<m->mat_h;i++){
     for(j=0;j<m->mat_w;j++){
       m->mat[j][i]=lyr->nrn[i]->weights[j];
@@ -146,20 +142,45 @@ matrix * weight_matrix(layer * lyr, matrix * m){
   }
   return m;
 }
-
 matrix * bias_vector(layer * lyr, matrix * m){
   int i;
-
   m->mat_h=1;
   m->mat_w=lyr->nb_neur;
-
   for(i=0;i<m->mat_w;i++){
     m->mat[0][i]=lyr->nrn[i].weights[lyr->nrn[i].n];
   }
   return m;
 }
-
 */
+
+void create_matrix_random(matrix *m, int number_rows, int number_columns){
+
+  int row;
+  int col;
+
+  m->mat_h = number_rows;
+  m->mat_w = number_columns;
+  
+  alloc_matrix(m);
+  
+  for(row=0; row<number_rows; row++){
+    for(col=0; col<number_columns; col++){
+      m->mat[row][col] = frand_a_b(0,255);
+    }
+  }
+}
+
+void matrix_init_bias(matrix *m){
+  m->mat[0][(m->mat_w)-1]=1.0;
+}
+
+void print_layer_output(layer *lyr){
+  int i;
+  
+  for(i=0;i<lyr->outputs->mat_w;i++){
+    printf("Output %d --->   %f\n",i,lyr->outputs->mat[0][i]);
+  }
+}
  
     
       
@@ -171,11 +192,23 @@ int main(){
   ntw=&objntw;
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={2,3,3,1};
+  int t[]={2,3,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
   
   ntw = alloc_network(ntw,info);
   print_network(ntw);
+
+  matrix * test;
+  test = malloc(sizeof(matrix));
+  create_matrix_random(test,1,3);
+  matrix_init_bias(test);
+  printMatrix(test);
+
+  layer_output(test,&(ntw->lyr[0]));
+  print_layer_output(&(ntw->lyr[0]));
+
+  
+  
   
 }

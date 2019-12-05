@@ -44,6 +44,7 @@ void create_matrix(matrix *m, int number_rows, int number_columns, float init){
 }
 
 
+
 void printMatrix(matrix *m){
 
   int row;
@@ -182,7 +183,7 @@ void matrix_relu(matrix * m){
 }
 
 
-matrix * dot_product(matrix * m1, matrix * m2, matrix * m3){
+matrix * matrix_dot_product(matrix * m1, matrix * m2, matrix * m3){
 
   int i, j, k;
   float res;
