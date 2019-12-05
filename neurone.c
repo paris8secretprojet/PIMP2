@@ -207,18 +207,18 @@ int main(){
   ntw=&objntw;
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={2,30,10,5,1};
+  int t[]={785,30,10,5,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
   
   ntw = alloc_network(ntw,info);
-  print_network(ntw);
+  //print_network(ntw);
 
   matrix * test;
   test = malloc(sizeof(matrix));
-  create_matrix_random(test,1,3);
+  create_matrix_random(test,1,785);
   matrix_init_bias(test);
-  printMatrix(test);
+  //printMatrix(test);
 
   //layer_output(test,&(ntw->lyr[0]));
   //print_layer_output(&(ntw->lyr[0]));

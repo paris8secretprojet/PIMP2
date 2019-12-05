@@ -196,6 +196,11 @@ matrix * matrix_dot_product(matrix * m1, matrix * m2, matrix * m3){
 
   if(m1->mat_w != m2->mat_h){
     printf("Produit des matrices impossible : Le nombre de ligne de la premiere matrice est different du nombre de colonne de la seconde\n\n");
+    printf("m1->mat_h : %d\n"
+	 "m1->mat_w : %d\n\n"
+	   "m2->mat_h : %d\n"
+	   "m2->mat_w : %d\n\n",
+	   m1->mat_h, m1->mat_w, m2->mat_h, m2->mat_w);
   }
   assert(m1->mat_w == m2->mat_h);
 
