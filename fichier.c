@@ -288,7 +288,6 @@ void imageContrast(image * pic, int delta){
 
 /*
 int rougeVoisins(image * pic, int x, int y){
-
   int i;
   int val=0;
   for(i=-1;i<2;i++){
@@ -301,10 +300,7 @@ int rougeVoisins(image * pic, int x, int y){
   val+=pic->tabl[y][x+1].r;
   return val;
 }
-
-
 int vertVoisins(image * pic, int x, int y){
-
   int i;
   int val=0;
   for(i=-1;i<2;i++){
@@ -317,9 +313,7 @@ int vertVoisins(image * pic, int x, int y){
   val+=pic->tabl[y][x+1].g;
   return val;
 }
-
 int bleuVoisins(image * pic, int x, int y){
-
   int i;
   int val=0;
   for(i=-1;i<2;i++){
@@ -332,13 +326,11 @@ int bleuVoisins(image * pic, int x, int y){
   val+=pic->tabl[y][x+1].b;
   return val;
 }
-
 void foncir(image * pic, int delta){
   int ix, iy;
   FILE * fd;
   fd=ouvrirEcrire("Foncir.512.ppm");
   fprintf(fd,"P%d\n%d %d\n%d\n",pic->entete,pic->nx-2,pic->ny-2,pic->valmax);
-
   for(iy=1;iy<pic->ny-1;iy++){
   for(ix=1;ix<pic->nx-1;ix++){
       

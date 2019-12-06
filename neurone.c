@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "matrices.c"
+#include "bdd.c"
 
 struct information{
   int n;
@@ -20,8 +21,20 @@ struct network{
   int nb_layer;
   layer * lyr;
   information info;
+  int class;
 };
 typedef struct network network;
+
+
+struct main_network{
+  int nb_ntw;
+  network ntw[26];
+  bdd * training;
+  bdd * test;
+  data_image * current;
+};
+typedef struct main_network main_network;
+
 
 
 //[nbfeat,3,3,1]
@@ -35,12 +48,10 @@ int rand_Belhadj(int n){
   return (int) (n*(rand()/RAND_MAX+1.0));
 }
 
-network * alloc_network(network * ntw, information info){
+void alloc_network(network * ntw, information info){
   int i, j, k;
-  matrix * weights;
-  matrix obj1;
-  weights = &obj1;
 
+  ntw->info=info;
   ntw->nb_layer=(info.n)-1;
   ntw->lyr = malloc(ntw->nb_layer * sizeof(layer));
 
@@ -67,9 +78,19 @@ network * alloc_network(network * ntw, information info){
       }
     }
   }
-  ntw->info=info;
-  return ntw;
 }
+
+void build_main_network(main_network * main_ntw, int nb_ntw, information info){
+  int i;
+
+  main_ntw->nb_ntw=nb_ntw;
+
+  for(i=0;i<nb_ntw;i++){
+    alloc_network(&(main_ntw->ntw[i]),info);
+  }
+}
+
+
  
 
 void print_network(network * ntw){
@@ -94,7 +115,7 @@ void print_network(network * ntw){
 
 void layer_output(matrix * previous_layer_output, layer * lyr){
 
-  int i, j;
+  int i;
   
   matrix * preactivation_matrix;
   matrix obj1;
@@ -182,6 +203,10 @@ void print_layer_output(layer *lyr){
   }
 }
 
+float calculate_error(float predict, float target){
+  return (target-predict)*(target-predict)/2;
+}
+
 void foreward(network * ntw, matrix * data){
   int i;
 
@@ -192,9 +217,18 @@ void foreward(network * ntw, matrix * data){
   for(i=0;i<ntw->nb_layer;i++){
     layer_output(*pt_data,&(ntw->lyr[i]));
     pt_data=&(ntw->lyr[i].outputs);
+    print_layer_output(&(ntw->lyr[i]));
   }
   printf("Predict :\n");
   print_layer_output(&(ntw->lyr[(ntw->nb_layer)-1]));
+}
+
+void global_foreward(main_network * main_ntw, matrix * data){
+  int i;
+
+  for(i=0;i<main_ntw->nb_ntw;i++){
+    foreward(&(main_ntw->ntw[i]),data);
+  }
 }
  
     
@@ -202,30 +236,37 @@ void foreward(network * ntw, matrix * data){
 int main(){
 
   information info;
-  network objntw;
-  network * ntw;
-  ntw=&objntw;
+  main_network * main_ntw;
+  //network * ntw;
+  bdd * basedd_train;
+  bdd * basedd_test;
+  basedd_train = malloc(sizeof(bdd));
+  basedd_test = malloc(sizeof(bdd));
+  main_ntw = malloc(sizeof(main_network));
+  //ntw = malloc(sizeof(network));
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={785,30,10,5,1};
+  int t[]={784,30,10,5,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
   
-  ntw = alloc_network(ntw,info);
+  //alloc_network(ntw,info);
   //print_network(ntw);
 
-  matrix * test;
-  test = malloc(sizeof(matrix));
-  create_matrix_random(test,1,785);
-  matrix_init_bias(test);
+  //matrix * test;
+  //test = malloc(sizeof(matrix));
+  //create_matrix_random(test,1,785);
+  //matrix_init_bias(test);
   //printMatrix(test);
 
   //layer_output(test,&(ntw->lyr[0]));
   //print_layer_output(&(ntw->lyr[0]));
 
-  foreward(ntw,test);
+  //foreward(ntw,test);
 
-  
-  
-  
+  build_main_network(main_ntw,26,info);
+  main_ntw->training = malloc(sizeof(bdd));
+  main_ntw->test = malloc(sizeof(bdd));
+  load_bdd(main_ntw->training,"emnist-balanced-train.txt");
+  load_bdd(main_ntw->test,"emnist-balanced-test.txt");
 }

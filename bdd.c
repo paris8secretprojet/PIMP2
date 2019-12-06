@@ -260,14 +260,14 @@ void print_bdd(bdd * basedd){
   //printf("\n\n");
 }
 
-
+/*
 int main(){
 
   bdd * basedd;
   basedd = malloc(sizeof(bdd));
 
   //printf("A\n");
-  load_bdd(basedd,"emnist-balanced-test.txt");
+  load_bdd(basedd,"emnist-balanced-train.txt");
 
 
   //printf("%d\n",basedd->n);
@@ -277,5 +277,5 @@ int main(){
 
 
 }
-    
+*/
   
