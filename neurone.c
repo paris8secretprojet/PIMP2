@@ -55,7 +55,7 @@ void print_errors(main_network * main_ntw, int network_index){
   for(i=main_ntw->ntw[network_index].nb_layer-1; i>=0 ;i--){
     printf("\nLAYER [%d] :\n",i);
     for(j=0; j<main_ntw->ntw[network_index].lyr[i].nb_nrn; j++){
-      printf("\tERROR Neurone [%d] ---> %f\n",j,main_ntw->ntw[network_index].lyr[i].error->mat[j][0]);
+      printf("\tERROR Neurone [%d] ---> %e\n",j,main_ntw->ntw[network_index].lyr[i].error->mat[j][0]);
     }
   }
 }
@@ -381,8 +381,9 @@ void layer_error(main_network * main_ntw, int network_index, int layer_index){
   for(i=0;i<main_ntw->ntw[network_index].lyr[layer_index].nb_nrn;i++){
     error = 0;
     for(j=0;j<main_ntw->ntw[network_index].lyr[layer_index+1].nb_nrn;j++){
-      error += (main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[j][0]) * (main_ntw->ntw[network_index].lyr[layer_index+1].weights->mat[j][0]);    
+      error += (main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[j][0]) * (main_ntw->ntw[network_index].lyr[layer_index+1].weights->mat[i][j]);    
     }
+    error *= main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0] * (1 - main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0]);
     main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0] = error; 
   }
 }
@@ -398,8 +399,8 @@ void layer_new_weights(main_network * main_ntw, int network_index, int layer_ind
     printf("WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
     printf("STEP_SIZE --> %f\n",STEPSIZE);
     
-    printf("ERROR --> %f\n",main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
-    main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0] -= STEPSIZE * (main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
+    printf("ERROR --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0]);
+    main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0] -= STEPSIZE * (main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0]);
   }
   printf("END LAYER_NEW_WEIGHTS\n");
 }
@@ -417,7 +418,7 @@ void backpropagation(main_network * main_ntw, int network_index){
   
   printf("CONTINUING BP, CALCULATING NEW LAYER WEIGHTS\n\n");
   printf("%d\n",main_ntw->ntw[network_index].nb_layer);
-  for(i=(main_ntw->ntw[network_index].nb_layer)-2; i>=0; i--){
+  for(i=(main_ntw->ntw[network_index].nb_layer)-1; i>=0; i--){
     printf("TEST\n");
     layer_new_weights(main_ntw, network_index, i);
   }
@@ -449,7 +450,7 @@ int main(){
   //ntw = malloc(sizeof(network));
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={784,2,2,2,1};
+  int t[]={784,2,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
 
