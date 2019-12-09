@@ -389,7 +389,7 @@ void backpropagation(main_network * main_ntw, int network_index){
     printf("TEST");
     layer_new_weights(main_ntw, network_index, i);
   }
-  printf("FINISHED BP, CALCULATING LAYER ERROR\n\n");  
+  printf("FINISHED BP\n\n");  
 }
 
 void training(main_network * main_ntw, int network_index){
