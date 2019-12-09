@@ -1,5 +1,6 @@
 //TODO : mettre le batch_size dans info
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "matrices.c"
@@ -369,11 +370,18 @@ void layer_error(main_network * main_ntw, int network_index, int layer_index){
 }
   
 void layer_new_weights(main_network * main_ntw, int network_index, int layer_index){
+
+  printf("START LAYER_NEW_WEIGHTS\n");
  
   int i; 
-  for (i=0; main_ntw->ntw[network_index].lyr[layer_index].nb_nrn; i++){
+  for (i=0; i<main_ntw->ntw[network_index].lyr[layer_index].nb_nrn; i++){
+    printf("ITERATION = %d   (LAYER_NEW_WEIGHTS)\n",i);
+    printf("WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
+    printf("STEP_SIZE --> %f\n",main_ntw->step_size);
+    printf("ERROR --> %f\n",main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
     main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0] -= main_ntw->step_size * (main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
   }
+  printf("END LAYER_NEW_WEIGHTS\n");
 }
 
 void backpropagation(main_network * main_ntw, int network_index){
@@ -385,11 +393,12 @@ void backpropagation(main_network * main_ntw, int network_index){
     layer_error(main_ntw, network_index, i);
   }
   printf("CONTINUING BP, CALCULATING NEW LAYER WEIGHTS\n\n");
+  printf("%d\n",main_ntw->ntw[network_index].nb_layer);
   for(i=(main_ntw->ntw[network_index].nb_layer)-1; i>=0; i--){
-    printf("TEST");
+    printf("TEST\n");
     layer_new_weights(main_ntw, network_index, i);
   }
-  printf("FINISHED BP\n\n");  
+  printf("FINISHED BP, CALCULATING LAYER ERROR\n\n");  
 }
 
 void training(main_network * main_ntw, int network_index){
