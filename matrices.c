@@ -331,6 +331,20 @@ matrix * matrix_remove_row(matrix *m1, matrix *m3, int indice){
   return m3;
 }
 
+float matrix_mean_column(matrix * m, int column_index){
+
+  int i;
+  float mean;
+  mean = 0;
+
+  for(i=0 ;i<m->mat_h ;i++){
+    mean += m->mat[i][column_index];
+  }
+  mean /= m->mat_h;
+
+  return mean;
+}
+
 
 /*
 int main(void){
