@@ -1,5 +1,5 @@
 //TODO : mettre le batch_size dans info
-
+#define STEPSIZE 0.01
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,6 +47,19 @@ typedef struct main_network main_network;
 
 
 //[nbfeat,3,3,1]
+
+void print_errors(main_network * main_ntw, int network_index){
+
+  int i, j;
+
+  for(i=main_ntw->ntw[network_index].nb_layer-1; i>=0 ;i--){
+    printf("\nLAYER [%d] :\n",i);
+    for(j=0; j<main_ntw->ntw[network_index].lyr[i].nb_nrn; j++){
+      printf("\tERROR Neurone [%d] ---> %f\n",j,main_ntw->ntw[network_index].lyr[i].error->mat[j][0]);
+    }
+  }
+}
+
 
 
 void matrix_init_bias(matrix *m){
@@ -352,13 +365,18 @@ void total_error(main_network * main_ntw, int network_index){
     error += pow(((matrix_expected->mat[i][0])-(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0])),2)/2;
     negative_target += ((matrix_expected->mat[i][0])-(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0]));
   }
+  printf("TOTAL_ERROR : error = %f\n",error);
   main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].error->mat[0][0] = error;
+  printf("TOTAL_ERROR : matrix_error = %f\n",main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].error->mat[0][0]);
   main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].negative_target = negative_target;
 }
 
 void layer_error(main_network * main_ntw, int network_index, int layer_index){
   int i, j;
   float error;
+
+  printf("\nLAYER_ERROR : nb_neurone for layer_index=%d   ---> %d\n",layer_index,main_ntw->ntw[network_index].lyr[layer_index].nb_nrn);
+  printf("LAYER_ERROR : nb_neurone for layer_index=%d   ---> %d\n",layer_index+1,main_ntw->ntw[network_index].lyr[layer_index+1].nb_nrn);
   
   for(i=0;i<main_ntw->ntw[network_index].lyr[layer_index].nb_nrn;i++){
     error = 0;
@@ -370,16 +388,18 @@ void layer_error(main_network * main_ntw, int network_index, int layer_index){
 }
   
 void layer_new_weights(main_network * main_ntw, int network_index, int layer_index){
-
-  printf("START LAYER_NEW_WEIGHTS\n");
- 
   int i; 
+  printf("START LAYER_NEW_WEIGHTS\n");
+
+  printf("NB_NEURONE DU LAYER [%d] = %d\n",layer_index,main_ntw->ntw[network_index].lyr[layer_index].nb_nrn);
+
   for (i=0; i<main_ntw->ntw[network_index].lyr[layer_index].nb_nrn; i++){
-    printf("ITERATION = %d   (LAYER_NEW_WEIGHTS)\n",i);
+    printf("\nITERATION = %d   (LAYER_NEW_WEIGHTS)\n",i);
     printf("WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
-    printf("STEP_SIZE --> %f\n",main_ntw->step_size);
+    printf("STEP_SIZE --> %f\n",STEPSIZE);
+    
     printf("ERROR --> %f\n",main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
-    main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0] -= main_ntw->step_size * (main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
+    main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0] -= STEPSIZE * (main_ntw->ntw[network_index].lyr[layer_index+1].error->mat[i][0]);
   }
   printf("END LAYER_NEW_WEIGHTS\n");
 }
@@ -392,9 +412,12 @@ void backpropagation(main_network * main_ntw, int network_index){
   for(i=(main_ntw->ntw[network_index].nb_layer)-2; i>=0; i--){
     layer_error(main_ntw, network_index, i);
   }
+
+  print_errors(main_ntw, network_index);
+  
   printf("CONTINUING BP, CALCULATING NEW LAYER WEIGHTS\n\n");
   printf("%d\n",main_ntw->ntw[network_index].nb_layer);
-  for(i=(main_ntw->ntw[network_index].nb_layer)-1; i>=0; i--){
+  for(i=(main_ntw->ntw[network_index].nb_layer)-2; i>=0; i--){
     printf("TEST\n");
     layer_new_weights(main_ntw, network_index, i);
   }
@@ -411,7 +434,7 @@ void training(main_network * main_ntw, int network_index){
   backpropagation(main_ntw, network_index);
 }
   
-    
+
       
 int main(){
   printf("A\n");
@@ -426,7 +449,7 @@ int main(){
   //ntw = malloc(sizeof(network));
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={784,2,2,1};
+  int t[]={784,2,2,2,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
 
