@@ -1,5 +1,5 @@
 //TODO : mettre le batch_size dans info
-#define STEPSIZE 0.01
+#define STEPSIZE 0.1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,9 +53,9 @@ void print_errors(main_network * main_ntw, int network_index){
   int i, j;
 
   for(i=main_ntw->ntw[network_index].nb_layer-1; i>=0 ;i--){
-    printf("\nLAYER [%d] :\n",i);
+    //printf("\nLAYER [%d] :\n",i);
     for(j=0; j<main_ntw->ntw[network_index].lyr[i].nb_nrn; j++){
-      printf("\tERROR Neurone [%d] ---> %e\n",j,main_ntw->ntw[network_index].lyr[i].error->mat[j][0]);
+      //printf("\tERROR Neurone [%d] ---> %e\n",j,main_ntw->ntw[network_index].lyr[i].error->mat[j][0]);
     }
   }
 }
@@ -125,7 +125,7 @@ void alloc_network(network * ntw, information info, int batch_size){
     
     for (j=0; j<ntw->lyr[i].weights->mat_h; j++){
       for (k=0; k<ntw->lyr[i].weights->mat_w; k++){
-	ntw->lyr[i].weights->mat[j][k] = frand_a_b(-1.0,1);
+	ntw->lyr[i].weights->mat[j][k] = frand_a_b(-0.5,0.5);
       }
     }
 
@@ -172,16 +172,16 @@ void build_main_network(main_network * main_ntw, int nb_ntw, information info,in
 void print_network(network * ntw){
   int i, j, k;
 
-  printf("\nNombre de features : %d\n",ntw->info.vect[0]);
-  printf("Nombre de layer : %d\n\n",(ntw->info.n)-1);
+  //printf("\nNombre de features : %d\n",ntw->info.vect[0]);
+  //printf("Nombre de layer : %d\n\n",(ntw->info.n)-1);
 
   for(i=0;i<ntw->info.n-1;i++){
     for(j=0;j<ntw->info.vect[i+1];j++){
       for(k=0;k<ntw->info.vect[i]+1;k++){
 
 	//	if(i==0){
-	  printf("LAYER%d, NEUR%d, WEIGHT%d  --->\t",i,j,k);
-	  printf("%f\n",ntw->lyr[i].weights->mat[k][j]);
+	//printf("LAYER%d, NEUR%d, WEIGHT%d  --->\t",i,j,k);
+	//printf("%f\n",ntw->lyr[i].weights->mat[k][j]);
       }
     }
     printf("\n");
@@ -261,21 +261,22 @@ void create_matrix_random(matrix *m, int number_rows, int number_columns){
   
   for(row=0; row<number_rows; row++){
     for(col=0; col<number_columns; col++){
-      m->mat[row][col] = frand_a_b(-1.0,1);
+      m->mat[row][col] = frand_a_b(-0.5,0.5);
     }
   }
 }
 
 
 
-void print_layer_output(main_network * main_ntw, layer *lyr){
+void print_layer_output(main_network * main_ntw, int indice_network, layer *lyr){
   int i, j;
   
   for(i=0;i<lyr->outputs->mat_h;i++){
     printf("\nData %d :\n",i);
+    printf("\t NEURONE CLASS -> %d\n",main_ntw->ntw[indice_network].class);
     printf("\t Class ---> %f ",main_ntw->current_batch_class->mat[i][0]);
     for(j=0;j<lyr->outputs->mat_w;j++){
-      printf("\tOutput %d --->   %f\n",j,lyr->outputs->mat[i][j]);
+      printf("\tOutput %d --->   %e\n",j,lyr->outputs->mat[i][j]);
     }
   }
 }
@@ -286,7 +287,7 @@ float calculate_error(float predict, float target){
 }
 */
 
-void foreward(main_network * main_ntw, int indice_network){
+void forward(main_network * main_ntw, int indice_network){
   int i;
 
   matrix ** pt_data;
@@ -299,15 +300,15 @@ void foreward(main_network * main_ntw, int indice_network){
     //print_layer_output(&(main_ntw->ntw[indice_network].lyr[i]));
   }
   printf("\n\n\nPredict :\n");
-  print_layer_output(main_ntw, &(main_ntw->ntw[indice_network].lyr[(main_ntw->ntw[indice_network].nb_layer)-1]));
+  print_layer_output(main_ntw, indice_network, &(main_ntw->ntw[indice_network].lyr[(main_ntw->ntw[indice_network].nb_layer)-1]));
 }
 
 /*
-void global_foreward(main_network * main_ntw, matrix * data){
+void global_forward(main_network * main_ntw, matrix * data){
   int i;
 
   for(i=0;i<main_ntw->nb_ntw;i++){
-    foreward(&(main_ntw->ntw[i]),data);
+    forward(&(main_ntw->ntw[i]),data);
   }
 }
 */
@@ -338,12 +339,15 @@ void build_batch(main_network * main_ntw, int n, int train_or_test){
 void whatdiduexpected(matrix * current_batch_class, int expected, matrix * matrix_expected){
   int i;
   
+  //printf("\nEXPECTED 1\n");
   for(i=0;i<matrix_expected->mat_h;i++){
     if(((int)current_batch_class->mat[i][0])==expected){
       matrix_expected->mat[i][0]=1;
+      //printf("\t1\n");
     }
     else{
       matrix_expected->mat[i][0]=0;
+      //printf("\t0\n");
     }
   }
 }
@@ -362,12 +366,23 @@ void total_error(main_network * main_ntw, int network_index){
   alloc_matrix(matrix_expected);
   whatdiduexpected(main_ntw->current_batch_class, main_ntw->ntw[network_index].class, matrix_expected);
   
+  //printf("\nEXPECTED 2\n");
+  //for(i=0;i<matrix_expected->mat_h;i++){
+  //printf("\t%f\n",matrix_expected->mat[i][0]);
+  //}
+  
   for(i=0;i<main_ntw->batch_size;i++){
-    error += pow(((matrix_expected->mat[i][0])-(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0])),2)/2;
+    error += ((matrix_expected->mat[i][0])-(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0]));
     negative_target += ((matrix_expected->mat[i][0])-(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0]));
   }
-  //printf("TOTAL_ERROR : error = %f\n",error);
+  
+  printf("TOTAL_ERROR 1 : error = %f\n",error);
+  
+  //error *= matrix_mean_column(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs,0) * (1 - (matrix_mean_column(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs,0)));
+  
+  printf("TOTAL_ERROR 2 : error = %f\n",error);
   main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].error->mat[0][0] = error;
+  
   //printf("TOTAL_ERROR : matrix_error = %f\n",main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].error->mat[0][0]);
   main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].negative_target = negative_target;
 }
@@ -391,42 +406,84 @@ void layer_error(main_network * main_ntw, int network_index, int layer_index){
     main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0] = error; 
   }
 }
+
+void new_final_layer_weights(main_network * main_ntw, int network_index){
+  int i, j;
+  float delta;
+
+  //printf("Hello\n");
+
+  for(i=0; i<main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].weights->mat_h; i++){
+    delta = 0;
+
+    //printf("I = %d\n",i);
+
+    if(main_ntw->ntw[network_index].nb_layer>1){
+      for(j=0;j<main_ntw->batch_size;j++){
+	delta += main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0] * ( 1 - main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[i][0]) * main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-2].outputs->mat[j][i];
+      }
+    }
+    
+    else{
+      //printf("B\n");
+      for(j=0;j<main_ntw->batch_size;j++){
+	//printf("J = %d\n",j);
+	delta += main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[j][0] * ( 1 - main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].outputs->mat[j][0]) * main_ntw->current_batch_data->mat[j][i];
+      }
+    }
+
+    //printf("C\n");
+    
+    main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].weights->mat[i][0] += STEPSIZE * delta * main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1].error->mat[0][0] / main_ntw->batch_size;
+
+
+  }
+
+}
+
   
 void layer_new_weights(main_network * main_ntw, int network_index, int layer_index){
-  int i; 
-  printf("START LAYER_NEW_WEIGHTS\n");
+  int i,j; 
+  //printf("START LAYER_NEW_WEIGHTS\n");
 
-  printf("NB_NEURONE DU LAYER [%d] = %d\n",layer_index,main_ntw->ntw[network_index].lyr[layer_index].nb_nrn);
+  //printf("NB_NEURONE DU LAYER [%d] = %d\n",layer_index,main_ntw->ntw[network_index].lyr[layer_index].nb_nrn);
 
   for (i=0; i<main_ntw->ntw[network_index].lyr[layer_index].nb_nrn; i++){
     printf("\nITERATION = %d   (LAYER_NEW_WEIGHTS)\n",i);
-    printf("WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
-    printf("STEP_SIZE --> %f\n",STEPSIZE);
-    
+    //printf("WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
+    //printf("STEP_SIZE --> %f\n",STEPSIZE);
     printf("ERROR --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0]);
-    main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0] -= STEPSIZE * (main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0]);
+    for (j=0 ;j<main_ntw->ntw[network_index].lyr[layer_index].weights->mat_h; j++){
+      //printf("WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
+      main_ntw->ntw[network_index].lyr[layer_index].weights->mat[j][i] -= STEPSIZE * (main_ntw->ntw[network_index].lyr[layer_index].error->mat[i][0]);
+      //printf("NEW WEIGHT --> %f\n",main_ntw->ntw[network_index].lyr[layer_index].weights->mat[i][0]);
+    }
   }
-  printf("END LAYER_NEW_WEIGHTS\n");
+    //printf("END LAYER_NEW_WEIGHTS\n");
 }
 
 void backpropagation(main_network * main_ntw, int network_index){
   int i;
-  printf("STARTING BP, CALCULATING TOTAL ERROR\n\n");
+  //printf("STARTING BP, CALCULATING TOTAL ERROR\n\n");
   total_error(main_ntw, network_index);
-  printf("CONTINUING BP, CALCULATING LAYER ERROR\n\n");
-  for(i=(main_ntw->ntw[network_index].nb_layer)-2; i>=0; i--){
-    layer_error(main_ntw, network_index, i);
-  }
+  //printf("CONTINUING BP, CALCULATING LAYER ERROR\n\n");
+  //for(i=(main_ntw->ntw[network_index].nb_layer)-2; i>=0; i--){
+  //layer_error(main_ntw, network_index, i);
+  //}
 
-  print_errors(main_ntw, network_index);
+  //print_errors(main_ntw, network_index);
   
-  printf("CONTINUING BP, CALCULATING NEW LAYER WEIGHTS\n\n");
-  printf("%d\n",main_ntw->ntw[network_index].nb_layer);
-  for(i=(main_ntw->ntw[network_index].nb_layer)-1; i>=0; i--){
-    printf("TEST\n");
-    layer_new_weights(main_ntw, network_index, i);
-  }
-  printf("FINISHED BP, CALCULATING LAYER ERROR\n\n");  
+  //printf("CONTINUING BP, CALCULATING NEW LAYER WEIGHTS\n\n");
+  //printf("%d\n",main_ntw->ntw[network_index].nb_layer);
+  //for(i=(main_ntw->ntw[network_index].nb_layer)-1; i>=0; i--){
+    //printf("TEST\n");
+    //layer_new_weights(main_ntw, network_index, i);
+  //}
+  //printf("FINISHED BP, CALCULATING LAYER ERROR\n\n");
+
+  new_final_layer_weights(main_ntw,network_index);
+  print_layer_output(main_ntw, network_index, &(main_ntw->ntw[network_index].lyr[(main_ntw->ntw[network_index].nb_layer)-1]));
+  
 }
 
 void training(main_network * main_ntw, int network_index){
@@ -434,11 +491,11 @@ void training(main_network * main_ntw, int network_index){
   int i;
   int epoch;
 
-  for(i=0 ;i<10 ;i++){
-    for(epoch=0 ; epoch < 62 ; epoch++){
+  for(i=0 ;i<1000 ;i++){
+    for(epoch=0 ; epoch < 1 ; epoch++){
 
       build_batch(main_ntw, epoch, 0);
-      foreward(main_ntw, network_index);
+      forward(main_ntw, network_index);
       backpropagation(main_ntw, network_index);
     }
   }
@@ -447,7 +504,7 @@ void training(main_network * main_ntw, int network_index){
 
       
 int main(){
-  printf("A\n");
+  //printf("A\n");
   information info;
   main_network * main_ntw;
   //network * ntw;
@@ -459,17 +516,17 @@ int main(){
   //ntw = malloc(sizeof(network));
 
   //[2,3,3,1] : Deux features, premiere couche(3 neurones), deuxieme couche(3 neurones), derniere couche(1 neurone)
-  int t[]={784,10,1};
+  int t[]={784,1};
   info.vect=t;
   info.n=sizeof(t)/sizeof(*t);
 
-  printf("B\n");
+  //printf("B\n");
   
   //alloc_network(ntw,info,3);
-  printf("L\n");
+  //printf("L\n");
   //print_network(ntw);
 
-  printf("M\n");
+  //printf("M\n");
 
   //matrix * test;
   //test = malloc(sizeof(matrix));
@@ -480,14 +537,14 @@ int main(){
   //layer_output(test,&(ntw->lyr[0]));
   //print_layer_output(&(ntw->lyr[0]));
 
-  //foreward(ntw,test);
+  //forward(ntw,test);
 
-  build_main_network(main_ntw,26,info,1000);
+  build_main_network(main_ntw,26,info,2);
   main_ntw->training = malloc(sizeof(bdd));
   main_ntw->test = malloc(sizeof(bdd));
   load_bdd(main_ntw->training,"emnist-balanced-train.txt");
   load_bdd(main_ntw->test,"emnist-balanced-test.txt");
 
-  main_ntw->ntw[0].class = 13;
+  main_ntw->ntw[0].class = 26;
   training(main_ntw, 0);
 }
