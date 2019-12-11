@@ -1,5 +1,5 @@
 //TODO : mettre le batch_size dans info
-#define STEPSIZE 0.001
+#define STEPSIZE 0.1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -367,7 +367,8 @@ void total_error(main_network * main_ntw, layer * last_lyr, int nrn_class){
   whatdiduexpected(main_ntw->current_batch_class, nrn_class, matrix_expected);
 
   for(i=0;i<main_ntw->batch_size;i++){
-    error += matrix_expected->mat[i][0] - last_lyr->outputs->mat[i][0];
+    error += last_lyr->outputs->mat[i][0] - matrix_expected->mat[i][0];
+    //error += matrix_expected->mat[i][0] - last_lyr->outputs->mat[i][0];
     negative_target += ((matrix_expected->mat[i][0])-(last_lyr->outputs->mat[i][0]));
   }
 
@@ -480,13 +481,22 @@ void backpropagation(main_network * main_ntw, int network_index){
 
 void training(main_network * main_ntw, int network_index){
 
-  int i;
+  int i, j, k;
   int epoch;
 
   for(i=0 ;i<1000 ;i++){
     for(epoch=0 ; epoch < 1 ; epoch++){
 
       build_batch(main_ntw, epoch, 0);
+
+      printf("\n\nBATCH\n\n");
+      for(j=0 ; j<main_ntw->current_batch_data->mat_h ; j++){
+	for(k=0 ; k<main_ntw->current_batch_data->mat_w ; k++){
+	  printf("%f\t",main_ntw->current_batch_data->mat[j][k]);
+	}
+	printf("\n");
+      }
+      
       forward(main_ntw, network_index);
       backpropagation(main_ntw, network_index);
     }
@@ -537,6 +547,6 @@ int main(){
   load_bdd(main_ntw->training,"emnist-balanced-train.txt");
   load_bdd(main_ntw->test,"emnist-balanced-test.txt");
 
-  main_ntw->ntw[0].class = 1;
+  main_ntw->ntw[0].class = 2;
   training(main_ntw, 0);
 }

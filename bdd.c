@@ -66,14 +66,16 @@ void load_data_image(data_image * im, int n, int * pix){
 
   for(i=1;i<n;i++){
     //im->pix[i-1]=pix[i];
-    
+
+    /*
     if(pix[i]==0){
       im->pix[i-1]=0.0001;
     }
     else{
       im->pix[i-1]=(float)pix[i]/(float)255;
     }
-    
+    */
+    im->pix[i-1]=pix[i];
   }
 }
 
