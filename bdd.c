@@ -75,7 +75,7 @@ void load_data_image(data_image * im, int n, int * pix){
       im->pix[i-1]=(float)pix[i]/(float)255;
     }
     */
-    im->pix[i-1]=pix[i];
+    im->pix[i-1]=((float)pix[i])/255*2-1;
   }
 }
 
