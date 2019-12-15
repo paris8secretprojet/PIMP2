@@ -4,8 +4,8 @@
 
 struct data_image{
   int n;
-  int * pix;
-  int classe;
+  float * pix;
+  int class;
 };
 typedef struct data_image data_image;
 
@@ -62,18 +62,12 @@ void load_data_image(data_image * im, int n, int * pix){
   int i;
   
   im->n=n-1;
-  im->classe=pix[0];
+  im->class=pix[0];
 
   for(i=1;i<n;i++){
-    im->pix[i-1]=pix[i];
-    /*
-    if(pix[i]==0){
-      im->pix[i-1]=0.001;
-    }
-    else{
-      im->pix[i-1]=(float)pix[i]/(float)255;
-    }
-    */
+    //im->pix[i-1]=pix[i];
+    
+    im->pix[i-1]=((float)pix[i])/255*2-1;
   }
 }
 
@@ -83,7 +77,7 @@ int nb_char_file(FILE * fd){
   int n;
   n=0;
 
-  printf("B3\n");
+  //printf("B3\n");
 
   do{
     fscanf(fd,"%c",&c);
@@ -105,7 +99,7 @@ void extract_char_file(FILE * fd, int n, char * char_file){
 
 void load_bdd(bdd * basedd, char * nom){
 
-  int n, i, j, z;
+  int n, i, z;
   FILE * fd;
   char * char_file;
   int nb_row;
@@ -114,7 +108,7 @@ void load_bdd(bdd * basedd, char * nom){
   char * nombre2;
   char * nombre1;
   int nb_chiffre;
-  int val_pixel;
+  //int val_pixel;
   int indice_pix;
   int indice_image;
   int * integer_data;
@@ -253,7 +247,7 @@ void print_bdd(bdd * basedd){
   for(i=0;i<basedd->n;i++){
     //printf("I : %d\n",i);
     for(j=0;j<basedd->im[i].n;j++){
-      printf("%d,",basedd->im[i].pix[j]);
+      printf("%f,",basedd->im[i].pix[j]);
     }
     //printf("\n\n\n");
   }
@@ -267,15 +261,13 @@ int main(){
   basedd = malloc(sizeof(bdd));
 
   //printf("A\n");
-  load_bdd(basedd,"emnist-balanced-train.txt");
+  load_bdd(basedd,"emnist-balanced-test.txt");
 
 
   //printf("%d\n",basedd->n);
   print_bdd(basedd);
 
-
-
-
 }
 */
+
   

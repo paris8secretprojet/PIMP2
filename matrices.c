@@ -146,6 +146,18 @@ void matrix_sigmoid(matrix * m){
   }
 }
 
+void matrix_sigmoid_general(matrix * m){
+
+  int i, j;
+
+  for(i=0;i<m->mat_h;i++){
+    for(j=0;j<m->mat_w;j++){
+      m->mat[i][j]=1/(1+exp(-(m->mat[i][j])))*2-1;
+    }
+  }
+}
+
+
 void matrix_sigmoid_prime(matrix * m){
 
   int i, j;
@@ -218,7 +230,6 @@ matrix * matrix_dot_product(matrix * m1, matrix * m2, matrix * m3){
       m3->mat[i][j]=res;
     }
   }
-  printf("\n");
   
   return m3;
 }
@@ -329,6 +340,20 @@ matrix * matrix_remove_row(matrix *m1, matrix *m3, int indice){
   printf("D\n");
   printMatrix(m3);
   return m3;
+}
+
+float matrix_mean_column(matrix * m, int column_index){
+
+  int i;
+  float mean;
+  mean = 0;
+
+  for(i=0 ;i<m->mat_h ;i++){
+    mean += m->mat[i][column_index];
+  }
+  mean /= m->mat_h;
+
+  return mean;
 }
 
 
